@@ -1,8 +1,67 @@
 const express = require("express");
+const fs = require("fs");
+const path = require("path");
 const machines = require("./data/machines.json");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
+
+// ===== 経費精算 API =====
+const EXPENSES_PATH = path.join(__dirname, "data", "expenses.json");
+
+function readExpenses() {
+  const data = fs.readFileSync(EXPENSES_PATH, "utf-8");
+  return JSON.parse(data);
+}
+
+function writeExpenses(data) {
+  fs.writeFileSync(EXPENSES_PATH, JSON.stringify(data, null, 2) + "\n");
+}
+
+// GET /api/expenses - 経費一覧取得
+app.get("/api/expenses", (req, res) => {
+  const data = readExpenses();
+  const total = data.expenses.reduce((sum, e) => sum + e.amount, 0);
+  res.json({ expenses: data.expenses, total });
+});
+
+// POST /api/expenses - 経費登録
+app.post("/api/expenses", (req, res) => {
+  const { date, description, amount } = req.body;
+  if (!date || !description || amount == null) {
+    return res.status(400).json({ error: "date, description, amount は必須です" });
+  }
+  const parsed = Number(amount);
+  if (isNaN(parsed) || parsed < 0) {
+    return res.status(400).json({ error: "amount は0以上の数値を指定してください" });
+  }
+  const data = readExpenses();
+  const newExpense = {
+    id: Date.now(),
+    date,
+    description,
+    amount: parsed,
+  };
+  data.expenses.push(newExpense);
+  writeExpenses(data);
+  res.status(201).json(newExpense);
+});
+
+// DELETE /api/expenses/:id - 経費削除
+app.delete("/api/expenses/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const data = readExpenses();
+  const idx = data.expenses.findIndex((e) => e.id === id);
+  if (idx === -1) {
+    return res.status(404).json({ error: "経費が見つかりません" });
+  }
+  data.expenses.splice(idx, 1);
+  writeExpenses(data);
+  res.json({ message: "削除しました" });
+});
 
 // GET /insights - パチンコ機種データの分析・比較エンドポイント
 app.get("/insights", (req, res) => {
@@ -106,4 +165,8 @@ app.listen(PORT, () => {
   console.log(`  GET /insights?week=3         - 特定週フィルター`);
   console.log(`  GET /insights?metric=打込    - 特定メトリクス`);
   console.log(`  GET /insights/compare        - 機種間比較`);
+  console.log(`  GET /expenses.html           - 経費精算アプリ`);
+  console.log(`  GET /api/expenses            - 経費一覧API`);
+  console.log(`  POST /api/expenses           - 経費登録API`);
+  console.log(`  DELETE /api/expenses/:id      - 経費削除API`);
 });
