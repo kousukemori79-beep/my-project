@@ -3,814 +3,453 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>パチンコ機種分析レポート</title>
+  <title>/insights — パチンコ機種 分析レポート</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: "Hiragino Sans", "Meiryo", sans-serif; background: #f5f7fa; color: #333; line-height: 1.6; }
-
-    .header {
-      background: linear-gradient(135deg, #1a237e, #283593);
-      color: #fff;
-      padding: 40px 32px;
-    }
-    .header h1 { font-size: 28px; margin-bottom: 4px; }
-    .header p { opacity: 0.8; font-size: 14px; }
-
-    .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
-
-    /* サマリーカード */
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-    .card {
+    body {
+      font-family: "Hiragino Sans", "Meiryo", -apple-system, sans-serif;
       background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      color: #37352f;
+      line-height: 1.6;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
     }
-    .card-title {
-      font-size: 13px;
-      color: #888;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 4px;
-    }
-    .card-value {
+
+    /* ヘッダー */
+    .page-title {
       font-size: 32px;
       font-weight: 700;
-      color: #1a237e;
+      margin-bottom: 32px;
+      color: #37352f;
     }
-    .card-sub { font-size: 12px; color: #999; margin-top: 2px; }
+    .page-title .date {
+      color: #9b9a97;
+      font-weight: 400;
+    }
 
     /* セクション */
-    .section {
-      background: #fff;
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 40px 0 16px;
+      color: #37352f;
     }
-    .section h2 {
-      font-size: 18px;
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #e8eaf6;
-      color: #1a237e;
-    }
-    .section h3 {
-      font-size: 15px;
-      margin: 20px 0 10px;
-      color: #444;
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 28px 0 12px;
+      color: #37352f;
     }
 
     /* テーブル */
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 13px;
-    }
-    th, td {
-      padding: 10px 12px;
-      text-align: right;
-      border-bottom: 1px solid #eee;
+      font-size: 14px;
+      margin-bottom: 8px;
     }
     th {
-      background: #f5f7fa;
-      color: #555;
-      font-weight: 600;
-      position: sticky;
-      top: 0;
-    }
-    th:first-child, td:first-child { text-align: left; }
-    tr:hover { background: #fafbff; }
-
-    .highlight { background: #e8f5e9; font-weight: 600; }
-    .warning { background: #fff3e0; }
-    .danger { background: #ffebee; }
-
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-    .badge-green { background: #e8f5e9; color: #2e7d32; }
-    .badge-red { background: #ffebee; color: #c62828; }
-    .badge-blue { background: #e3f2fd; color: #1565c0; }
-    .badge-orange { background: #fff3e0; color: #e65100; }
-
-    /* バーチャート */
-    .bar-chart { margin: 8px 0; }
-    .bar-row {
-      display: flex;
-      align-items: center;
-      margin: 6px 0;
-    }
-    .bar-label {
-      width: 180px;
+      text-align: left;
+      padding: 8px 12px;
+      color: #9b9a97;
+      font-weight: 500;
       font-size: 12px;
-      flex-shrink: 0;
+      border-bottom: 1px solid #e9e9e7;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
-    .bar-track {
-      flex: 1;
-      height: 24px;
-      background: #f0f0f0;
-      border-radius: 4px;
-      overflow: hidden;
-      position: relative;
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f1f1ef;
+      vertical-align: top;
     }
-    .bar-fill {
-      height: 100%;
-      border-radius: 4px;
+    tr:hover { background: #f7f6f3; }
+
+    /* ステータスバッジ */
+    .status {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* 優先度ドット */
+    .priority {
       display: flex;
       align-items: center;
-      padding-left: 8px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #fff;
-      min-width: 40px;
+      gap: 6px;
+      font-size: 13px;
+      white-space: nowrap;
     }
-    .bar-val {
-      margin-left: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      width: 70px;
-      text-align: right;
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
       flex-shrink: 0;
     }
+    .dot-red { background: #e03e3e; }
+    .dot-yellow { background: #dfab01; }
+    .dot-green { background: #0f7b6c; }
+    .dot-blue { background: #2f80ed; }
 
-    .color-eva { background: linear-gradient(90deg, #7b1fa2, #9c27b0); }
-    .color-hokuto { background: linear-gradient(90deg, #1565c0, #42a5f5); }
-    .color-jigoku { background: linear-gradient(90deg, #c62828, #ef5350); }
-    .color-madoka { background: linear-gradient(90deg, #e91e63, #f48fb1); }
-
-    /* 週次推移テーブル */
-    .scroll-x { overflow-x: auto; }
-
-    .trend-up::before { content: "▲ "; color: #2e7d32; }
-    .trend-down::before { content: "▼ "; color: #c62828; }
-
-    .footer {
-      text-align: center;
-      padding: 24px;
-      color: #aaa;
-      font-size: 12px;
+    /* 注意ボックス */
+    .alert-section {
+      margin-top: 32px;
+    }
+    .alert-item {
+      padding: 8px 0;
+      font-size: 14px;
+      line-height: 1.7;
+      border-bottom: 1px solid #f1f1ef;
+    }
+    .alert-item:last-child { border-bottom: none; }
+    .alert-label {
+      font-weight: 700;
+      color: #e03e3e;
+    }
+    .alert-label-warn {
+      font-weight: 700;
+      color: #dfab01;
     }
 
-    .grid-2 {
+    /* メトリクスカード */
+    .metrics-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
     }
-    @media (max-width: 768px) {
-      .grid-2 { grid-template-columns: 1fr; }
+    .metric-card {
+      background: #f7f6f3;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .metric-label {
+      font-size: 12px;
+      color: #9b9a97;
+      margin-bottom: 4px;
+    }
+    .metric-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #37352f;
+    }
+    .metric-sub {
+      font-size: 12px;
+      color: #9b9a97;
+      margin-top: 2px;
     }
 
-    .insight-box {
-      background: #fffde7;
-      border-left: 4px solid #fbc02d;
-      padding: 12px 16px;
-      margin: 12px 0;
-      border-radius: 0 8px 8px 0;
+    /* トレンドインジケーター */
+    .trend-up { color: #0f7b6c; }
+    .trend-down { color: #e03e3e; }
+    .trend-flat { color: #9b9a97; }
+
+    /* 週次ミニテーブル */
+    .mini-table {
       font-size: 13px;
     }
-    .insight-box strong { color: #f57f17; }
+    .mini-table th {
+      font-size: 11px;
+    }
+    .mini-table td {
+      padding: 6px 10px;
+      text-align: right;
+    }
+    .mini-table td:first-child {
+      text-align: left;
+    }
+
+    .detail-note {
+      font-size: 13px;
+      color: #73726e;
+      margin: 8px 0 0;
+      line-height: 1.7;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #e9e9e7;
+      margin: 32px 0;
+    }
+
+    .footer {
+      margin-top: 48px;
+      padding-top: 16px;
+      border-top: 1px solid #e9e9e7;
+      font-size: 12px;
+      color: #b4b4b0;
+    }
   </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="container">
-    <h1>パチンコ機種 分析レポート</h1>
-    <p>対象期間: 2025年12月 〜 2026年3月 ｜ 対象機種: 4機種 ｜ レポート作成日: 2026-03-14</p>
+<div class="page-title">
+  /insights <span class="date">— 2026年3月14日（最新）</span>
+</div>
+
+<!-- ===== 機種一覧 ===== -->
+<h2>機種一覧</h2>
+<table>
+  <thead>
+    <tr>
+      <th>機種</th>
+      <th>状態</th>
+      <th>直近の動き</th>
+      <th>優先度</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>eエヴァンゲリオン17R</strong></td>
+      <td><span class="status">安定稼働中</span></td>
+      <td>第10週 打込22,778で底打ち安定、中古相場97万円維持</td>
+      <td><span class="priority"><span class="dot dot-red"></span>高</span></td>
+    </tr>
+    <tr>
+      <td><strong>e北斗の拳11 SHEF</strong></td>
+      <td><span class="status">稼働中</span></td>
+      <td>第10週 打込17,362、台粗利7,593で下げ止まり傾向</td>
+      <td><span class="priority"><span class="dot dot-yellow"></span>中</span></td>
+    </tr>
+    <tr>
+      <td><strong>e地獄少女7500 RHZ</strong></td>
+      <td><span class="status">稼働低下中</span></td>
+      <td>第10週 打込14,938（初週比-61%）、中古相場26万円まで下落</td>
+      <td><span class="priority"><span class="dot dot-yellow"></span>中</span></td>
+    </tr>
+    <tr>
+      <td><strong>eまどか☆マギカ3</strong></td>
+      <td><span class="status">新台導入</span></td>
+      <td>3/1発売、初日打込37,445・台粗利10,735の堅実スタート</td>
+      <td><span class="priority"><span class="dot dot-green"></span>低</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ===== 注意が必要な状況 ===== -->
+<div class="alert-section">
+  <h2>注意が必要な状況</h2>
+  <div class="alert-item">
+    <span class="alert-label">地獄少女の稼働急落:</span> 第10週の打込14,938は初週比-61%。中古相場も26.3万円（第2週比-69%）で、入替検討タイミングに入っている。
+  </div>
+  <div class="alert-item">
+    <span class="alert-label-warn">北斗の拳 中古相場下落:</span> 第4週ピーク93.9万円 → 第10週40.7万円（-57%）。稼働は底打ち傾向だが、資産価値の減少に注意。
+  </div>
+  <div class="alert-item">
+    <span class="alert-label-warn">まどマギ 週次データ未取得:</span> 発売直後のため週次推移データなし。第1週データの取得・初動評価が必要。
   </div>
 </div>
 
-<div class="container">
+<hr class="divider">
 
-  <!-- ===== 全体サマリー ===== -->
-  <div class="summary-grid">
-    <div class="card">
-      <div class="card-title">対象機種数</div>
-      <div class="card-value">4</div>
-      <div class="card-sub">2025/12 発売: 3機種 ｜ 2026/03 発売: 1機種</div>
-    </div>
-    <div class="card">
-      <div class="card-title">総推定販売台数</div>
-      <div class="card-value">69,000</div>
-      <div class="card-sub">エヴァ 30,000 / 北斗 25,000 / 地獄少女 6,000 / まどマギ 8,000</div>
-    </div>
-    <div class="card">
-      <div class="card-title">初日平均打込</div>
-      <div class="card-value">38,618</div>
-      <div class="card-sub">4機種平均（最高: エヴァ 40,248）</div>
-    </div>
-    <div class="card">
-      <div class="card-title">初日平均台粗利</div>
-      <div class="card-value">12,219</div>
-      <div class="card-sub">4機種平均（最高: 地獄少女 17,937）</div>
-    </div>
+<!-- ===== サマリー指標 ===== -->
+<h2>サマリー指標</h2>
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-label">対象機種数</div>
+    <div class="metric-value">4</div>
+    <div class="metric-sub">2025/12発売: 3 ｜ 2026/03発売: 1</div>
   </div>
-
-  <!-- ===== 機種概要比較 ===== -->
-  <div class="section">
-    <h2>1. 機種概要比較</h2>
-    <div class="scroll-x">
-      <table>
-        <thead>
-          <tr>
-            <th>機種名</th>
-            <th>発売日</th>
-            <th>販売台数</th>
-            <th>初日打込</th>
-            <th>初日台粗利</th>
-            <th>初日玉利</th>
-            <th>初日有効S</th>
-            <th>動画再生回数</th>
-            <th>動画本数</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>eエヴァンゲリオン17R</strong></td>
-            <td>2025/12/21</td>
-            <td>30,000</td>
-            <td class="highlight">40,248</td>
-            <td>10,365</td>
-            <td>0.258</td>
-            <td>5.82</td>
-            <td>3,103,840</td>
-            <td class="highlight">42</td>
-          </tr>
-          <tr>
-            <td><strong>e北斗の拳11暴凶星SHEF</strong></td>
-            <td>2025/12/07</td>
-            <td>25,000</td>
-            <td>37,951</td>
-            <td>9,839</td>
-            <td>0.259</td>
-            <td>5.71</td>
-            <td>1,530,175</td>
-            <td>33</td>
-          </tr>
-          <tr>
-            <td><strong>e地獄少女7500Ver. RHZ</strong></td>
-            <td>2025/12/07</td>
-            <td>6,000</td>
-            <td>37,828</td>
-            <td class="highlight">17,937</td>
-            <td class="highlight">0.474</td>
-            <td class="highlight">10.57</td>
-            <td class="highlight">3,081,667</td>
-            <td>14</td>
-          </tr>
-          <tr>
-            <td><strong>e魔法少女まどか☆マギカ3</strong></td>
-            <td>2026/03/01</td>
-            <td>8,000</td>
-            <td>37,445</td>
-            <td>10,735</td>
-            <td>0.287</td>
-            <td>6.47</td>
-            <td>263,553</td>
-            <td>17</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="insight-box">
-      <strong>注目:</strong> 地獄少女は販売台数6,000台と最少ながら、初日台粗利17,937円・玉利0.474と突出した収益性。有効S 10.57は他機種の約2倍で、スペック的な回転効率の高さが際立つ。
-    </div>
+  <div class="metric-card">
+    <div class="metric-label">総推定販売台数</div>
+    <div class="metric-value">69,000</div>
+    <div class="metric-sub">エヴァ30K / 北斗25K / 地獄少女6K / まどマギ8K</div>
   </div>
-
-  <!-- ===== 初日打込ビジュアル ===== -->
-  <div class="section">
-    <h2>2. 初日パフォーマンス比較</h2>
-
-    <h3>打込（初日）</h3>
-    <div class="bar-chart">
-      <div class="bar-row">
-        <div class="bar-label">eエヴァンゲリオン17R</div>
-        <div class="bar-track"><div class="bar-fill color-eva" style="width:100%"></div></div>
-        <div class="bar-val">40,248</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">e北斗の拳11 SHEF</div>
-        <div class="bar-track"><div class="bar-fill color-hokuto" style="width:94.3%"></div></div>
-        <div class="bar-val">37,951</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">e地獄少女7500 RHZ</div>
-        <div class="bar-track"><div class="bar-fill color-jigoku" style="width:94.0%"></div></div>
-        <div class="bar-val">37,828</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">eまどか☆マギカ3</div>
-        <div class="bar-track"><div class="bar-fill color-madoka" style="width:93.0%"></div></div>
-        <div class="bar-val">37,445</div>
-      </div>
-    </div>
-
-    <h3>台粗利（初日）</h3>
-    <div class="bar-chart">
-      <div class="bar-row">
-        <div class="bar-label">e地獄少女7500 RHZ</div>
-        <div class="bar-track"><div class="bar-fill color-jigoku" style="width:100%"></div></div>
-        <div class="bar-val">17,937</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">eまどか☆マギカ3</div>
-        <div class="bar-track"><div class="bar-fill color-madoka" style="width:59.8%"></div></div>
-        <div class="bar-val">10,735</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">eエヴァンゲリオン17R</div>
-        <div class="bar-track"><div class="bar-fill color-eva" style="width:57.8%"></div></div>
-        <div class="bar-val">10,365</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">e北斗の拳11 SHEF</div>
-        <div class="bar-track"><div class="bar-fill color-hokuto" style="width:54.9%"></div></div>
-        <div class="bar-val">9,839</div>
-      </div>
-    </div>
-
-    <h3>玉利（初日）</h3>
-    <div class="bar-chart">
-      <div class="bar-row">
-        <div class="bar-label">e地獄少女7500 RHZ</div>
-        <div class="bar-track"><div class="bar-fill color-jigoku" style="width:100%"></div></div>
-        <div class="bar-val">0.474</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">eまどか☆マギカ3</div>
-        <div class="bar-track"><div class="bar-fill color-madoka" style="width:60.5%"></div></div>
-        <div class="bar-val">0.287</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">e北斗の拳11 SHEF</div>
-        <div class="bar-track"><div class="bar-fill color-hokuto" style="width:54.6%"></div></div>
-        <div class="bar-val">0.259</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">eエヴァンゲリオン17R</div>
-        <div class="bar-track"><div class="bar-fill color-eva" style="width:54.4%"></div></div>
-        <div class="bar-val">0.258</div>
-      </div>
-    </div>
+  <div class="metric-card">
+    <div class="metric-label">初日平均打込</div>
+    <div class="metric-value">38,618</div>
+    <div class="metric-sub">最高: エヴァ 40,248</div>
   </div>
-
-  <!-- ===== 超率打込比較 ===== -->
-  <div class="section">
-    <h2>3. 超率打込比較（初日）</h2>
-    <div class="scroll-x">
-      <table>
-        <thead>
-          <tr>
-            <th>機種名</th>
-            <th>20,000</th>
-            <th>25,000</th>
-            <th>30,000</th>
-            <th>35,000</th>
-            <th>40,000</th>
-            <th>45,000</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>eエヴァンゲリオン17R</strong></td>
-            <td class="highlight">95%</td>
-            <td class="highlight">88%</td>
-            <td class="highlight">79%</td>
-            <td class="highlight">69%</td>
-            <td class="highlight">58%</td>
-            <td class="highlight">42%</td>
-          </tr>
-          <tr>
-            <td><strong>e北斗の拳11 SHEF</strong></td>
-            <td>93%</td>
-            <td>84%</td>
-            <td>70%</td>
-            <td>58%</td>
-            <td>46%</td>
-            <td>35%</td>
-          </tr>
-          <tr>
-            <td><strong>e地獄少女7500 RHZ</strong></td>
-            <td>91%</td>
-            <td>81%</td>
-            <td>68%</td>
-            <td>57%</td>
-            <td>46%</td>
-            <td>35%</td>
-          </tr>
-          <tr>
-            <td><strong>eまどか☆マギカ3</strong></td>
-            <td>91%</td>
-            <td>82%</td>
-            <td>70%</td>
-            <td>57%</td>
-            <td>44%</td>
-            <td>31%</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="insight-box">
-      <strong>分析:</strong> エヴァが全ボーダーで最高の超率を記録。30,000打込超率79%は他機種を9〜11pt上回る。販売台数30,000台の大型導入がホールの稼働意欲の高さを示している。
-    </div>
+  <div class="metric-card">
+    <div class="metric-label">初日平均台粗利</div>
+    <div class="metric-value">12,219</div>
+    <div class="metric-sub">最高: 地獄少女 17,937</div>
   </div>
+</div>
 
-  <!-- ===== 週次推移（打込） ===== -->
-  <div class="section">
-    <h2>4. 週次推移 — 打込</h2>
-    <div class="scroll-x">
-      <table>
-        <thead>
-          <tr>
-            <th>機種名</th>
-            <th>第1週</th>
-            <th>第2週</th>
-            <th>第3週</th>
-            <th>第4週</th>
-            <th>第5週</th>
-            <th>第6週</th>
-            <th>第7週</th>
-            <th>第8週</th>
-            <th>第9週</th>
-            <th>第10週</th>
-            <th>減少率</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>eエヴァ17R</strong></td>
-            <td>42,738</td><td>40,280</td><td>32,867</td><td>29,440</td><td>26,744</td>
-            <td>25,726</td><td>22,665</td><td>22,784</td><td>21,576</td><td>22,778</td>
-            <td class="danger"><span class="trend-down">46.7%</span></td>
-          </tr>
-          <tr>
-            <td><strong>e北斗 SHEF</strong></td>
-            <td>40,177</td><td>35,436</td><td>29,005</td><td>29,888</td><td>22,530</td>
-            <td>20,188</td><td>19,787</td><td>18,343</td><td>16,785</td><td>17,362</td>
-            <td class="danger"><span class="trend-down">56.8%</span></td>
-          </tr>
-          <tr>
-            <td><strong>e地獄少女 RHZ</strong></td>
-            <td>37,945</td><td>33,772</td><td>27,991</td><td>28,442</td><td>19,926</td>
-            <td>17,873</td><td>16,748</td><td>17,723</td><td>14,395</td><td>14,938</td>
-            <td class="danger"><span class="trend-down">60.6%</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="insight-box">
-      <strong>傾向:</strong> 3機種とも10週で打込は約半減。エヴァは第7週以降22,000前後で底打ちし安定稼働。北斗・地獄少女は緩やかに下落が継続。エヴァの粘り強さはIPの集客力を反映。
-    </div>
-  </div>
+<hr class="divider">
 
-  <!-- ===== 週次推移（台粗利） ===== -->
-  <div class="section">
-    <h2>5. 週次推移 — 台粗利</h2>
-    <div class="scroll-x">
-      <table>
-        <thead>
-          <tr>
-            <th>機種名</th>
-            <th>第1週</th>
-            <th>第2週</th>
-            <th>第3週</th>
-            <th>第4週</th>
-            <th>第5週</th>
-            <th>第6週</th>
-            <th>第7週</th>
-            <th>第8週</th>
-            <th>第9週</th>
-            <th>第10週</th>
-            <th>減少率</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>eエヴァ17R</strong></td>
-            <td>13,470</td><td class="highlight">17,171</td><td>10,651</td><td>9,806</td><td>8,749</td>
-            <td>8,515</td><td>7,085</td><td>7,817</td><td>6,937</td><td>7,305</td>
-            <td class="warning"><span class="trend-down">45.8%</span></td>
-          </tr>
-          <tr>
-            <td><strong>e北斗 SHEF</strong></td>
-            <td>15,564</td><td>16,218</td><td>12,665</td><td class="highlight">14,766</td><td>9,282</td>
-            <td>8,033</td><td>8,180</td><td>7,220</td><td>6,503</td><td>7,593</td>
-            <td class="danger"><span class="trend-down">51.2%</span></td>
-          </tr>
-          <tr>
-            <td><strong>e地獄少女 RHZ</strong></td>
-            <td>13,075</td><td>11,044</td><td>13,234</td><td>11,983</td><td>8,122</td>
-            <td>7,162</td><td>7,291</td><td class="highlight">9,198</td><td>5,773</td><td>6,466</td>
-            <td class="danger"><span class="trend-down">50.6%</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="insight-box">
-      <strong>注目:</strong> 北斗は第4週に台粗利14,766円と一時的に回復。地獄少女も第8週に9,198円へ跳ね上がり。いずれも釘調整やイベント施策の影響と推測される。エヴァは第2週の17,171円がピーク。
-    </div>
-  </div>
+<!-- ===== 週次推移ハイライト ===== -->
+<h2>週次推移ハイライト</h2>
 
-  <!-- ===== 中古相場推移 ===== -->
-  <div class="section">
-    <h2>6. 中古相場推移</h2>
-    <div class="scroll-x">
-      <table>
-        <thead>
-          <tr>
-            <th>機種名</th>
-            <th>第1週</th>
-            <th>第2週</th>
-            <th>第3週</th>
-            <th>第4週</th>
-            <th>第5週</th>
-            <th>第6週</th>
-            <th>第7週</th>
-            <th>第8週</th>
-            <th>第9週</th>
-            <th>第10週</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>eエヴァ17R</strong></td>
-            <td>—</td><td>1,435,714</td><td>1,435,753</td><td class="highlight">1,491,891</td><td>1,049,550</td>
-            <td>1,027,215</td><td>943,600</td><td>1,000,913</td><td>922,982</td><td>970,768</td>
-          </tr>
-          <tr>
-            <td><strong>e北斗 SHEF</strong></td>
-            <td>407,272</td><td>578,707</td><td>813,970</td><td class="highlight">939,101</td><td>911,162</td>
-            <td>702,411</td><td>550,613</td><td>489,058</td><td>393,635</td><td>406,912</td>
-          </tr>
-          <tr>
-            <td><strong>e地獄少女 RHZ</strong></td>
-            <td>—</td><td>839,373</td><td>690,119</td><td>642,421</td><td>631,115</td>
-            <td>472,080</td><td>344,078</td><td>323,243</td><td>280,760</td><td>262,807</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="insight-box">
-      <strong>分析:</strong>
-      <br>- <strong>エヴァ</strong>: 第4週に149万円のピーク後、約97万円で高値安定。IP人気を反映し10週後も圧倒的な中古価値を維持。
-      <br>- <strong>北斗</strong>: 第4週93.9万円をピークに急落。10週後は40.7万円（ピーク比 -57%）。
-      <br>- <strong>地獄少女</strong>: 一貫して下落。10週後は26.3万円（第2週比 -69%）。販売台数が少ないにも関わらず下落が激しく、稼働低下が直結。
-    </div>
-  </div>
+<h3>打込推移（第1週 → 第10週）</h3>
+<table class="mini-table">
+  <thead>
+    <tr>
+      <th>機種</th>
+      <th>第1週</th>
+      <th>第5週</th>
+      <th>第10週</th>
+      <th>変化</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>eエヴァ17R</strong></td>
+      <td>42,738</td>
+      <td>26,744</td>
+      <td>22,778</td>
+      <td><span class="trend-down">-46.7%</span></td>
+    </tr>
+    <tr>
+      <td><strong>e北斗 SHEF</strong></td>
+      <td>40,177</td>
+      <td>22,530</td>
+      <td>17,362</td>
+      <td><span class="trend-down">-56.8%</span></td>
+    </tr>
+    <tr>
+      <td><strong>e地獄少女 RHZ</strong></td>
+      <td>37,945</td>
+      <td>19,926</td>
+      <td>14,938</td>
+      <td><span class="trend-down">-60.6%</span></td>
+    </tr>
+  </tbody>
+</table>
+<p class="detail-note">エヴァは第7週以降22,000前後で安定。北斗・地獄少女は緩やかに下落継続。</p>
 
-  <!-- ===== 超率打込 週次推移（30,000基準） ===== -->
-  <div class="section">
-    <h2>7. 超率打込 推移（30,000打込基準）</h2>
-    <div class="scroll-x">
-      <table>
-        <thead>
-          <tr>
-            <th>機種名</th>
-            <th>第1週</th>
-            <th>第2週</th>
-            <th>第3週</th>
-            <th>第4週</th>
-            <th>第5週</th>
-            <th>第6週</th>
-            <th>第7週</th>
-            <th>第8週</th>
-            <th>第9週</th>
-            <th>第10週</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>eエヴァ17R</strong></td>
-            <td class="highlight">87%</td><td>81%</td><td>61%</td><td>51%</td><td>42%</td>
-            <td>39%</td><td>29%</td><td>30%</td><td>27%</td><td>30%</td>
-          </tr>
-          <tr>
-            <td><strong>e北斗 SHEF</strong></td>
-            <td>78%</td><td>66%</td><td>48%</td><td>50%</td><td>28%</td>
-            <td>23%</td><td>22%</td><td>18%</td><td>15%</td><td>16%</td>
-          </tr>
-          <tr>
-            <td><strong>e地獄少女 RHZ</strong></td>
-            <td>74%</td><td>62%</td><td>44%</td><td>45%</td><td>21%</td>
-            <td>16%</td><td>15%</td><td>16%</td><td>9%</td><td>10%</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="insight-box">
-      <strong>要点:</strong> 30,000打込を超える割合が第10週時点でエヴァ30%に対し、北斗16%、地獄少女10%。エヴァは3台に1台がまだ3万発を超えており、長期稼働力の差が明確。
-    </div>
-  </div>
+<h3>台粗利推移（第1週 → 第10週）</h3>
+<table class="mini-table">
+  <thead>
+    <tr>
+      <th>機種</th>
+      <th>第1週</th>
+      <th>第5週</th>
+      <th>第10週</th>
+      <th>変化</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>eエヴァ17R</strong></td>
+      <td>13,470</td>
+      <td>8,749</td>
+      <td>7,305</td>
+      <td><span class="trend-down">-45.8%</span></td>
+    </tr>
+    <tr>
+      <td><strong>e北斗 SHEF</strong></td>
+      <td>15,564</td>
+      <td>9,282</td>
+      <td>7,593</td>
+      <td><span class="trend-down">-51.2%</span></td>
+    </tr>
+    <tr>
+      <td><strong>e地獄少女 RHZ</strong></td>
+      <td>13,075</td>
+      <td>8,122</td>
+      <td>6,466</td>
+      <td><span class="trend-down">-50.6%</span></td>
+    </tr>
+  </tbody>
+</table>
+<p class="detail-note">北斗は第4週に14,766円と一時回復。地獄少女も第8週に9,198円へ跳ね上がり。釘調整やイベント施策の影響と推測。</p>
 
-  <!-- ===== 動画・話題性 ===== -->
-  <div class="section">
-    <h2>8. 動画・話題性分析</h2>
-    <div class="scroll-x">
-      <table>
-        <thead>
-          <tr>
-            <th>機種名</th>
-            <th>初日再生数</th>
-            <th>第1週再生数</th>
-            <th>第1週本数</th>
-            <th>ピーク再生数</th>
-            <th>ピーク週</th>
-            <th>第10週再生数</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>eエヴァ17R</strong></td>
-            <td>3,103,840</td>
-            <td class="highlight">27,355,752</td>
-            <td class="highlight">1,006</td>
-            <td class="highlight">27,355,752</td>
-            <td>第1週</td>
-            <td class="highlight">8,519,776</td>
-          </tr>
-          <tr>
-            <td><strong>e北斗 SHEF</strong></td>
-            <td>1,530,175</td>
-            <td>12,391,746</td>
-            <td>591</td>
-            <td>12,391,746</td>
-            <td>第1週</td>
-            <td>2,478,955</td>
-          </tr>
-          <tr>
-            <td><strong>e地獄少女 RHZ</strong></td>
-            <td>3,081,667</td>
-            <td>9,005,578</td>
-            <td>159</td>
-            <td>9,005,578</td>
-            <td>第1週</td>
-            <td>1,460,101</td>
-          </tr>
-          <tr>
-            <td><strong>eまどか☆マギカ3</strong></td>
-            <td>263,553</td>
-            <td colspan="5" style="text-align:center; color:#999;">— 週次データなし（発売直後） —</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="insight-box">
-      <strong>分析:</strong> エヴァは第1週に2,735万再生・1,006本と圧倒的な動画コンテンツ量。10週後も851万再生を維持しYouTube等での話題性が継続。地獄少女は販売台数が少ないのに初日再生数310万と高く、スペックへの注目度が高い。まどマギは発売直後のため初日26万再生にとどまるが、今後の伸びに注目。
-    </div>
-  </div>
+<h3>中古相場推移</h3>
+<table class="mini-table">
+  <thead>
+    <tr>
+      <th>機種</th>
+      <th>第2週</th>
+      <th>ピーク</th>
+      <th>第10週</th>
+      <th>変化</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>eエヴァ17R</strong></td>
+      <td>1,435,714</td>
+      <td>1,491,891 <span class="trend-flat">(4週)</span></td>
+      <td>970,768</td>
+      <td><span class="trend-down">-34.9%</span></td>
+    </tr>
+    <tr>
+      <td><strong>e北斗 SHEF</strong></td>
+      <td>578,707</td>
+      <td>939,101 <span class="trend-flat">(4週)</span></td>
+      <td>406,912</td>
+      <td><span class="trend-down">-56.7%</span></td>
+    </tr>
+    <tr>
+      <td><strong>e地獄少女 RHZ</strong></td>
+      <td>839,373</td>
+      <td>839,373 <span class="trend-flat">(2週)</span></td>
+      <td>262,807</td>
+      <td><span class="trend-down">-68.7%</span></td>
+    </tr>
+  </tbody>
+</table>
+<p class="detail-note">エヴァは10週後も97万円と高値維持。地獄少女は26万円まで下落（-69%）、資産価値の維持が課題。</p>
 
-  <!-- ===== 玉利推移 ===== -->
-  <div class="section">
-    <h2>9. 収益効率（玉利）推移</h2>
-    <div class="scroll-x">
-      <table>
-        <thead>
-          <tr>
-            <th>機種名</th>
-            <th>初日</th>
-            <th>第1週</th>
-            <th>第2週</th>
-            <th>第3週</th>
-            <th>第4週</th>
-            <th>第5週</th>
-            <th>第6週</th>
-            <th>第7週</th>
-            <th>第8週</th>
-            <th>第9週</th>
-            <th>第10週</th>
-            <th>平均</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>eエヴァ17R</strong></td>
-            <td>0.258</td>
-            <td>0.315</td><td class="highlight">0.426</td><td>0.324</td><td>0.333</td><td>0.327</td>
-            <td>0.331</td><td>0.313</td><td>0.343</td><td>0.322</td><td>0.321</td>
-            <td><strong>0.335</strong></td>
-          </tr>
-          <tr>
-            <td><strong>e北斗 SHEF</strong></td>
-            <td>0.259</td>
-            <td>0.387</td><td>0.458</td><td>0.437</td><td class="highlight">0.494</td><td>0.412</td>
-            <td>0.398</td><td>0.413</td><td>0.394</td><td>0.387</td><td>0.437</td>
-            <td><strong>0.422</strong></td>
-          </tr>
-          <tr>
-            <td><strong>e地獄少女 RHZ</strong></td>
-            <td>0.474</td>
-            <td>0.345</td><td>0.327</td><td>0.473</td><td>0.421</td><td>0.408</td>
-            <td>0.401</td><td>0.435</td><td class="highlight">0.519</td><td>0.401</td><td>0.433</td>
-            <td><strong class="highlight">0.416</strong></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="insight-box">
-      <strong>要点:</strong> 北斗は週平均玉利0.422と最も高く、ホールにとって効率の良い収益源。地獄少女も0.416で同水準。エヴァは0.335と相対的に低く、集客重視（甘めの運用）の位置づけと推測。
-    </div>
-  </div>
+<hr class="divider">
 
-  <!-- ===== 総合評価 ===== -->
-  <div class="section">
-    <h2>10. 総合評価</h2>
+<!-- ===== 総合評価 ===== -->
+<h2>総合評価</h2>
+<table>
+  <thead>
+    <tr>
+      <th>機種</th>
+      <th>集客力</th>
+      <th>収益性</th>
+      <th>持続力</th>
+      <th>中古価値</th>
+      <th>総合</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>eエヴァ17R</strong></td>
+      <td>S</td>
+      <td>A</td>
+      <td>S</td>
+      <td>S</td>
+      <td><strong>S</strong></td>
+    </tr>
+    <tr>
+      <td><strong>e北斗 SHEF</strong></td>
+      <td>A</td>
+      <td>A</td>
+      <td>B</td>
+      <td>B</td>
+      <td><strong>A</strong></td>
+    </tr>
+    <tr>
+      <td><strong>e地獄少女 RHZ</strong></td>
+      <td>A</td>
+      <td>S</td>
+      <td>C</td>
+      <td>C</td>
+      <td><strong>B+</strong></td>
+    </tr>
+    <tr>
+      <td><strong>eまどマギ3</strong></td>
+      <td>A</td>
+      <td>A</td>
+      <td>—</td>
+      <td>—</td>
+      <td><strong>保留</strong></td>
+    </tr>
+  </tbody>
+</table>
 
-    <table>
-      <thead>
-        <tr>
-          <th>評価項目</th>
-          <th>eエヴァ17R</th>
-          <th>e北斗 SHEF</th>
-          <th>e地獄少女 RHZ</th>
-          <th>eまどマギ3</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><strong>集客力（打込）</strong></td>
-          <td class="highlight"><span class="badge badge-green">S</span></td>
-          <td><span class="badge badge-blue">A</span></td>
-          <td><span class="badge badge-blue">A</span></td>
-          <td><span class="badge badge-blue">A</span></td>
-        </tr>
-        <tr>
-          <td><strong>収益性（台粗利）</strong></td>
-          <td><span class="badge badge-blue">A</span></td>
-          <td><span class="badge badge-blue">A</span></td>
-          <td class="highlight"><span class="badge badge-green">S</span></td>
-          <td><span class="badge badge-blue">A</span></td>
-        </tr>
-        <tr>
-          <td><strong>稼働持続力</strong></td>
-          <td class="highlight"><span class="badge badge-green">S</span></td>
-          <td><span class="badge badge-orange">B</span></td>
-          <td><span class="badge badge-red">C</span></td>
-          <td><span class="badge badge-blue">—</span></td>
-        </tr>
-        <tr>
-          <td><strong>収益効率（玉利）</strong></td>
-          <td><span class="badge badge-orange">B</span></td>
-          <td class="highlight"><span class="badge badge-green">S</span></td>
-          <td class="highlight"><span class="badge badge-green">S</span></td>
-          <td><span class="badge badge-blue">A</span></td>
-        </tr>
-        <tr>
-          <td><strong>中古価値維持</strong></td>
-          <td class="highlight"><span class="badge badge-green">S</span></td>
-          <td><span class="badge badge-orange">B</span></td>
-          <td><span class="badge badge-red">C</span></td>
-          <td><span class="badge badge-blue">—</span></td>
-        </tr>
-        <tr>
-          <td><strong>話題性</strong></td>
-          <td class="highlight"><span class="badge badge-green">S</span></td>
-          <td><span class="badge badge-blue">A</span></td>
-          <td><span class="badge badge-blue">A</span></td>
-          <td><span class="badge badge-orange">B</span></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h3 style="margin-top: 24px;">機種別コメント</h3>
-
-    <div class="insight-box" style="border-left-color: #7b1fa2;">
-      <strong>eエヴァンゲリオン17はじまりの記憶R</strong><br>
-      販売台数30,000台のフラッグシップ機。初日打込40,248、第10週でも22,778と高い稼働維持力。中古相場も10週後に97万円と圧倒的。玉利は0.335と控えめだが、集客マシンとしてフロア全体の底上げに貢献する機種。話題性もダントツで動画再生数は常に他機種の2〜3倍。<strong>総合評価: S</strong>
-    </div>
-
-    <div class="insight-box" style="border-left-color: #1565c0;">
-      <strong>e北斗の拳11暴凶星SHEF</strong><br>
-      バランス型の良機。打込は第10週17,362と堅実に推移し、玉利0.422の高収益効率を10週間にわたり維持。中古相場は第4週の93.9万円から40.7万円に下落したが、台粗利の安定感が光る。中〜大規模ホール向けの収益安定枠として優秀。<strong>総合評価: A</strong>
-    </div>
-
-    <div class="insight-box" style="border-left-color: #c62828;">
-      <strong>e地獄少女7500Ver. RHZ</strong><br>
-      販売台数6,000台の限定導入ながら、初日台粗利17,937円は4機種中トップ。有効S 10.57の高回転スペックで収益効率が高い。ただし稼働低下が最も急激で、第10週の打込は14,938（初週比 -61%）。中古相場も26.3万円まで下落。短期集中回収型の機種。<strong>総合評価: B+</strong>
-    </div>
-
-    <div class="insight-box" style="border-left-color: #e91e63;">
-      <strong>e魔法少女まどか☆マギカ3LPM1</strong><br>
-      2026/03/01発売の新台。初日打込37,445、台粗利10,735、玉利0.287と堅実なスタート。有効S 6.47は中間的。初日動画再生数26.3万と控えめだが、人気IPであり今後の週次データに注目。超率打込は30,000で70%と良好。<strong>総合評価: 評価保留（データ蓄積待ち）</strong>
-    </div>
-  </div>
-
+<h3>機種別コメント</h3>
+<div class="alert-item">
+  <strong>eエヴァンゲリオン17R</strong> — フラッグシップ機。集客力・稼働持続力・中古価値すべてトップ。玉利0.335と控えめだが、フロア全体の底上げに貢献。
+</div>
+<div class="alert-item">
+  <strong>e北斗の拳11 SHEF</strong> — バランス型。玉利0.422の高収益効率を10週維持。中〜大規模ホール向けの安定枠。
+</div>
+<div class="alert-item">
+  <strong>e地獄少女7500 RHZ</strong> — 初日台粗利17,937円で4機種中トップの収益性。ただし稼働低下が最も急。短期集中回収型。
+</div>
+<div class="alert-item">
+  <strong>eまどか☆マギカ3</strong> — 3/1発売の新台。初日は堅実スタート。週次データの蓄積待ち。
 </div>
 
 <div class="footer">
-  パチンコ機種分析レポート ｜ Generated by /insights API ｜ 2026-03-14
+  /insights API ｜ Generated on 2026-03-14
 </div>
 
 </body>
