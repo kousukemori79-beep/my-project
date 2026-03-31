@@ -1,8 +1,11 @@
 const express = require("express");
 const machines = require("./data/machines.json");
+const tasksRouter = require("./routes/tasks");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(express.json());
 
 // GET /insights - パチンコ機種データの分析・比較エンドポイント
 app.get("/insights", (req, res) => {
@@ -99,6 +102,8 @@ app.get("/insights/compare", (req, res) => {
   res.json({ comparison, rankings });
 });
 
+app.use("/tasks", tasksRouter);
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`  GET /insights          - 機種データ & サマリー`);
@@ -106,4 +111,9 @@ app.listen(PORT, () => {
   console.log(`  GET /insights?week=3         - 特定週フィルター`);
   console.log(`  GET /insights?metric=打込    - 特定メトリクス`);
   console.log(`  GET /insights/compare        - 機種間比較`);
+  console.log(`  GET    /tasks               - List all tasks`);
+  console.log(`  GET    /tasks/:id           - Get a task`);
+  console.log(`  POST   /tasks               - Create a task`);
+  console.log(`  PUT    /tasks/:id           - Update a task`);
+  console.log(`  DELETE /tasks/:id           - Delete a task`);
 });
