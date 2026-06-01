@@ -2,22 +2,23 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Current State
+## 現在の状態
 
-This repository is a fresh scaffold. As of this writing it contains only a `README.md`
-(holding the project title `my-project`) and a single "Initial commit" — there is no
-source code, build system, dependency manifest, test suite, or tooling configuration yet.
+このリポジトリは作成されたばかりのスキャフォールド（雛形）です。現時点では `README.md`
+（プロジェクト名 `my-project` を記載）と最初のコミット（"Initial commit"）のみが存在し、
+ソースコード、ビルドシステム、依存関係の定義ファイル、テストスイート、ツール設定などは
+まだ含まれていません。
 
-There are therefore no build, lint, or test commands to document at this time. As the
-codebase grows, this file should be updated to capture:
+そのため、現時点ではビルド・lint・テストに関するコマンドはありません。コードベースが
+成長するにつれて、このファイルを更新し、以下を記載してください。
 
-- **Commands** for building, running, testing (including how to run a single test), and linting.
-- **Architecture** — the big-picture structure and the relationships between components
-  that span multiple files, so future instances can become productive quickly.
-- **Conventions** — any non-obvious project-specific patterns worth following.
+- **コマンド** — ビルド、実行、テスト（単一テストの実行方法を含む）、lint の方法。
+- **アーキテクチャ** — 全体像となる構造と、複数ファイルにまたがるコンポーネント間の関係。
+  将来のインスタンスが素早く生産的になれるようにするため。
+- **規約** — 従うべきプロジェクト固有の非自明なパターン。
 
-## Notes for the first substantial change
+## 最初の本格的な変更を加えるとき
 
-When the first real code lands (e.g. a language/framework is chosen and a dependency
-manifest is added), revisit this file and replace this section with concrete commands and
-architecture notes derived from the actual code.
+最初の実コードが追加されたとき（言語・フレームワークが選定され、依存関係の定義ファイルが
+追加されたときなど）は、このファイルを見直し、このセクションを実際のコードに基づく具体的な
+コマンドとアーキテクチャの説明に置き換えてください。
