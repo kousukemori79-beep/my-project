@@ -1,0 +1,3 @@
+# このファイルは dotclaude/ フォルダを Git 上に保持するためのものです。
+# 実際の設定ファイル（settings.json / CLAUDE.md / keybindings.json）は
+# sync スクリプトの push 操作でここに作成されます。

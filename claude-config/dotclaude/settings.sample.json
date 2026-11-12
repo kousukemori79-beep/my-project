@@ -1,0 +1,11 @@
+{
+  "model": "claude-opus-4-8",
+  "theme": "dark",
+  "env": {
+    "EXAMPLE_PUBLIC_SETTING": "value-here"
+  },
+  "permissions": {
+    "allow": [],
+    "deny": []
+  }
+}

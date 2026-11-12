@@ -1,0 +1,11 @@
+# Claude Code の秘密情報は同期しない（各PCでローカル管理）
+claude-config/dotclaude/settings.local.json
+claude-config/dotclaude/.env
+claude-config/dotclaude/.credentials.json
+
+# sync スクリプトが作る上書き前バックアップ
+*.bak-*
+
+# OS が作る不要ファイル
+.DS_Store
+Thumbs.db

@@ -111,7 +111,10 @@ Macでは、まず**パッケージ管理ツール「Homebrew」**を入れて�
 4. **MCPサーバー／プラグイン／スキル**: 設定ファイルに定義が含まれていれば一緒に移る。外部トークンを使うMCPがある場合は、第7章に従ってキーを設定し直す。
 5. **動作確認**: Macで `claude` を起動し、モデル・権限・キーバインドが旧PCと同じか確認する。
 
-- **おすすめ（再現性を高める）**: `~/.claude` の設定をgitリポジトリ（例: 本 `my-project`）で管理し、各PCで `git clone` / `pull` して反映すると、複数PCで常に同じ仕様を保てます。ご希望があれば、この仕組み（設定テンプレート＋反映手順）も別途用意できます。
+- **おすすめ（再現性を高める）**: `~/.claude` の設定をgitリポジトリで管理し、各PCで反映すると、複数PCで常に同じ仕様を保てます。本リポジトリに **`claude-config/`** として同期の仕組みを用意済みです（Windows / Mac 両対応）。使い方は `claude-config/README.md` を参照。
+  - Windows PC（現在の正）: `claude-config` で `.\sync.ps1 push` → `git commit` / `push`
+  - Mac: `git pull` → `claude-config` で `./sync.sh pull`
+  - 秘密情報（APIキー・トークン）は同期せず、`~/.claude/settings.local.json` でPCごとに管理します。
 - 要確認: 旧PCの `.claude` 配下に実際にどのファイルがあるか（存在するものだけ移行すればOK）。
 
 ## 6. 開発プロジェクト移行時の注意（Windows → Mac特有）
